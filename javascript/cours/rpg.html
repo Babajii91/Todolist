@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation de Combat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .result {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .log {
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #222;
+            color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Simulation de Combat</h1>
+    <button id="startCombat">Commencer le Combat</button>
+    <div class="result" id="result">Résultat du combat : </div>
+    <div class="log" id="log">Console de combat :</div>
+</div>
+
+<script>
+    class Perso {
+        constructor(force, pv, vitesse) {
+            this.force = force;
+            this.pv = pv;
+            this.vitesse = vitesse;
+        }
+
+        attaquer(adversaire) {
+            adversaire.pv -= this.force;
+        }
+
+        ResteVivant() {
+            return this.pv > 0;
+        }
+    }
+
+    function logMessage(message) {
+        const log = document.getElementById('log');
+        log.innerHTML += message + '<br>';
+    }
+
+    function combat(Perso_A, Perso_B) {
+        while (Perso_A.ResteVivant() && Perso_B.ResteVivant()) {
+            if (Perso_A.vitesse >= Perso_B.vitesse) {
+                Perso_A.attaquer(Perso_B);
+                if (Perso_B.ResteVivant()) {
+                    Perso_B.attaquer(Perso_A);
+                }
+            } else {
+                Perso_B.attaquer(Perso_A);
+                if (Perso_A.ResteVivant()) {
+                    Perso_A.attaquer(Perso_B);
+                }
+            }
+        }
+
+        if (Perso_A.ResteVivant()) {
+            logMessage(`Perso_A a gagné !`);
+            return Perso_A;
+        } else {
+            logMessage(`Perso_B a gagné !`);
+            return Perso_B;
+        }
+    }
+
+    document.getElementById('startCombat').addEventListener('click', function () {
+        const Perso_A = new Perso(20, 10, 10);
+        const Perso_B = new Perso(60, 500, 300);
+        const Perso_C = new Perso(80, 120, 50);
+
+        const resultDiv = document.getElementById('result');
+        document.getElementById('log').innerHTML = ""; // Reset log
+
+        // Premier combat : Perso_A vs Perso_B
+        const gagnantPremierCombat = combat(Perso_A, Perso_B);
+
+        // Si le gagnant du premier combat existe, il affronte Perso_C
+        if (gagnantPremierCombat.ResteVivant()) {
+            logMessage("Le gagnant affronte un nouvel ennemi, Perso_C !");
+            const gagnantSecondCombat = combat(gagnantPremierCombat, Perso_C);
+
+            if (gagnantSecondCombat === Perso_C) {
+                resultDiv.innerHTML = "Résultat du combat : Perso_C a gagné le deuxième combat !";
+            } else {
+                resultDiv.innerHTML = "Résultat du combat : Le gagnant du premier combat a gagné contre Perso_C !";
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
